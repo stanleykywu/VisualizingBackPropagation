@@ -11,10 +11,12 @@ public class Driver {
         out[1][0] = 0;
         in[0][0] = 0.3;
 
-        Net simple = new Net(out, false);
+        Net simple = new Net(out, true);
 
-        for(int epoch = 0; epoch < 100; epoch++) {
-            System.out.println(simple.propAndUpdate(in));
-        }
+//        for(int epoch = 0; epoch < 100; epoch++) {
+//            System.out.println(simple.propAndUpdate(in));
+//        }
+        WorldVisual yay = new WorldVisual(simple, in);
+        yay.bigBang(500, 500, 2);
     }
 }
