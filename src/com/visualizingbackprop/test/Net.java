@@ -1,6 +1,7 @@
 package com.visualizingbackprop.test;
 import tester.Tester;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -43,13 +44,16 @@ class Utility {
 class Net {
     double[][] inputWeights;
     double[][] hiddenWeights;
-    double[][] expectedOut;
+    ArrayList<double[][]> inputs;
+    ArrayList<double[][]> expectedOut;
     boolean activation;
 
-    Net(double[][] expectedOut, boolean activ) {
+    Net(ArrayList<double[][]> inputs, ArrayList<double[][]> expectedOut, boolean activ) {
+        this.inputs = inputs;
         this.expectedOut = expectedOut;
         this.activation = activ;
-        this.inputWeights = new double[2][1];
+
+        this.inputWeights = new double[2][2];
         this.hiddenWeights = new double[2][2];
 
         for (int i = 0; i < inputWeights.length; i++) {
@@ -89,15 +93,20 @@ class Net {
         }
     }
 
-    public double propAndUpdate(double[][] inputs) {
+    public double propAndUpdate() {
+        double[][] lookAtInput = this.inputs.get(new Random().nextInt(this.inputs.size()));
+        double[][] lookAtOutput = this.expectedOut.get(new Random().nextInt(this.expectedOut.size()));
+
         if (this.activation) {
-            return this.propAndUpdateFunc(inputs, (x -> this.sigmoid(x)), (x -> this.sigmoidDeriv(x)));
+            return this.propAndUpdateFunc(lookAtInput, lookAtOutput,
+                    (x -> this.sigmoid(x)), (x -> this.sigmoidDeriv(x)));
         } else {
-            return this.propAndUpdateFunc(inputs, (x -> this.rectLinear(x)), (x -> this.rectLinearDeriv(x)));
+            return this.propAndUpdateFunc(lookAtInput, lookAtOutput,
+                    (x -> this.rectLinear(x)), (x -> this.rectLinearDeriv(x)));
         }
     }
 
-    public double propAndUpdateFunc(double[][] inputs, Function<Double, Double> activation,
+    public double propAndUpdateFunc(double[][] inputs, double[][] output, Function<Double, Double> activation,
                                        Function<Double, Double> activationDer) {
         Utility utils = new Utility();
 
@@ -107,19 +116,23 @@ class Net {
         double[][] inB = utils.multiplyMatrices(this.hiddenWeights, outA);
         double[][] outB = utils.map(inB, activation);
 
-        double totalLossOne = utils.loss(outB[0][0], expectedOut[0][0]);
-        double totalLossTwo = utils.loss(outB[1][0], expectedOut[1][0]);
+        double totalLossOne = utils.loss(outB[0][0], output[0][0]);
+        double totalLossTwo = utils.loss(outB[1][0], output[1][0]);
 
-        double deltaOut00 = 2 * (outB[0][0] - expectedOut[0][0]) * activationDer.apply(inB[0][0]) * outA[0][0];
-        double deltaOut01 = 2 * (outB[0][0] - expectedOut[0][0]) * activationDer.apply(inB[1][0]) * outA[0][0];
-        double deltaOut10 = 2 * (outB[1][0] - expectedOut[1][0]) * activationDer.apply(inB[0][0]) * outA[1][0];
-        double deltaOut11 = 2 * (outB[1][0] - expectedOut[1][0]) * activationDer.apply(inB[1][0]) * outA[1][0];
+        double deltaOut00 = 2 * (outB[0][0] - output[0][0]) * activationDer.apply(inB[0][0]) * outA[0][0];
+        double deltaOut01 = 2 * (outB[0][0] - output[0][0]) * activationDer.apply(inB[1][0]) * outA[0][0];
+        double deltaOut10 = 2 * (outB[1][0] - output[1][0]) * activationDer.apply(inB[0][0]) * outA[1][0];
+        double deltaOut11 = 2 * (outB[1][0] - output[1][0]) * activationDer.apply(inB[1][0]) * outA[1][0];
 
-        double deltaA1 = (deltaOut00 + deltaOut10) * activationDer.apply(inA[0][0]) * inputs[0][0];
-        double deltaA2 = (deltaOut01 + deltaOut11) * activationDer.apply(inA[1][0]) * inputs[0][0];
+        double deltaIn00 = (deltaOut00 + deltaOut10) * activationDer.apply(inA[0][0]) * inputs[0][0];
+        double deltaIn01 = (deltaOut00 + deltaOut10) * activationDer.apply(inA[0][0]) * inputs[1][0];
+        double deltaIn10 = (deltaOut01 + deltaOut11) * activationDer.apply(inA[1][0]) * inputs[0][0];
+        double deltaIn11 = (deltaOut01 + deltaOut11) * activationDer.apply(inA[1][0]) * inputs[1][0];
 
-        this.inputWeights[0][0] -= deltaA1;
-        this.inputWeights[1][0] -= deltaA2;
+        this.inputWeights[0][0] -= deltaIn00;
+        this.inputWeights[0][1] -= deltaIn01;
+        this.inputWeights[1][0] -= deltaIn10;
+        this.inputWeights[1][1] -= deltaIn11;
 
         this.hiddenWeights[0][0] -= deltaOut00;
         this.hiddenWeights[0][1] -= deltaOut01;
