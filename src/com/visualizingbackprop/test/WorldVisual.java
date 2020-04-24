@@ -23,24 +23,30 @@ public class WorldVisual extends World {
         WorldScene empty = this.getEmptyScene();
         empty.placeImageXY(IConstants.background, 250, 250);
 
-        empty.placeImageXY(new LineImage(new Posn(175, -100),
-                this.scaleColor(this.simpleNet.inputWeights[0][0])), 138, 200);
-        empty.placeImageXY(new LineImage(new Posn(175, 100),
-                this.scaleColor(this.simpleNet.inputWeights[1][0])), 138, 300);
-        empty.placeImageXY(new LineImage(new Posn(175, 0),
-                this.scaleColor(this.simpleNet.hiddenWeights[0][0])), 312, 150);
-        empty.placeImageXY(new LineImage(new Posn(175, 200),
-                this.scaleColor(this.simpleNet.hiddenWeights[1][0])), 312, 250);
-        empty.placeImageXY(new LineImage(new Posn(175, -200),
-                this.scaleColor(this.simpleNet.hiddenWeights[0][1])), 312, 250);
-        empty.placeImageXY(new LineImage(new Posn(175, 0),
-                this.scaleColor(this.simpleNet.hiddenWeights[1][1])), 312, 350);
+        empty.placeImageXY(new RectangleImage(175, 4, OutlineMode.SOLID,
+                this.scaleColor(this.simpleNet.inputWeights[0][0])), 162, 150);
+        empty.placeImageXY(new RectangleImage(175, 4, OutlineMode.SOLID,
+                this.scaleColor(this.simpleNet.inputWeights[1][1])), 162, 350);
+        empty.placeImageXY(new RectangleImage(175, 4, OutlineMode.SOLID,
+                this.scaleColor(this.simpleNet.hiddenWeights[0][0])), 337, 150);
+        empty.placeImageXY(new RectangleImage(175, 4, OutlineMode.SOLID,
+                this.scaleColor(this.simpleNet.hiddenWeights[1][1])), 337, 350);
 
-        empty.placeImageXY(IConstants.node, 50, 250);
-        empty.placeImageXY(IConstants.node, 225, 150);
-        empty.placeImageXY(IConstants.node, 225, 350);
-        empty.placeImageXY(IConstants.node, 400, 150);
-        empty.placeImageXY(IConstants.node, 400, 350);
+        empty.placeImageXY(new RotateImage(new RectangleImage(265, 4, OutlineMode.SOLID,
+                this.scaleColor(this.simpleNet.inputWeights[1][0])), 48), 162, 250);
+        empty.placeImageXY(new RotateImage(new RectangleImage(265, 4, OutlineMode.SOLID,
+                this.scaleColor(this.simpleNet.hiddenWeights[1][0])), 48), 337, 250);
+        empty.placeImageXY(new RotateImage(new RectangleImage(265, 4, OutlineMode.SOLID,
+                this.scaleColor(this.simpleNet.inputWeights[0][1])), 132), 162, 250);
+        empty.placeImageXY(new RotateImage(new RectangleImage(265, 4, OutlineMode.SOLID,
+                this.scaleColor(this.simpleNet.hiddenWeights[0][1])), 132), 337, 250);
+
+        empty.placeImageXY(IConstants.node, 75, 150);
+        empty.placeImageXY(IConstants.node, 75, 350);
+        empty.placeImageXY(IConstants.node, 250, 150);
+        empty.placeImageXY(IConstants.node, 250, 350);
+        empty.placeImageXY(IConstants.node, 425, 150);
+        empty.placeImageXY(IConstants.node, 425, 350);
 
         return empty;
     }
