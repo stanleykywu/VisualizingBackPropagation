@@ -8,16 +8,14 @@ import java.awt.*;
 
 interface IConstants {
     WorldImage node = new CircleImage(20, OutlineMode.SOLID, Color.darkGray);
-    WorldImage background = new RectangleImage(500, 500, OutlineMode.SOLID, Color.BLACK);
+    WorldImage background = new RectangleImage(500, 500, OutlineMode.SOLID, Color.WHITE);
 }
 
 public class WorldVisual extends World {
     Net simpleNet;
-    double[][] input;
 
-    WorldVisual(Net simpleNet, double[][] input) {
+    WorldVisual(Net simpleNet) {
         this.simpleNet = simpleNet;
-        this.input = input;
     }
 
     @Override
@@ -49,11 +47,16 @@ public class WorldVisual extends World {
 
     @Override
     public void onTick() {
-        System.out.println("Loss: " + this.simpleNet.propAndUpdate(this.input));
+        System.out.println("Loss: " + this.simpleNet.propAndUpdate());
     }
 
     public Color scaleColor(double weight) {
-        int whiteScale = 255 - Math.min(Math.max((int) (weight  * 255), 20), 255);
+        int whiteScale = 255 - Math.min(Math.max((int) (weight  * 255), 25), 255);
         return new Color(whiteScale, whiteScale, whiteScale);
+    }
+
+    @Override
+    public WorldEnd worldEnds() {
+        return super.worldEnds();
     }
 }
