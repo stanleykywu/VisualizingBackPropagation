@@ -13,9 +13,11 @@ interface IConstants {
 
 public class WorldVisual extends World {
     Net simpleNet;
+    double loss;
 
     WorldVisual(Net simpleNet) {
         this.simpleNet = simpleNet;
+        this.loss = 0;
     }
 
     @Override
@@ -48,12 +50,50 @@ public class WorldVisual extends World {
         empty.placeImageXY(IConstants.node, 425, 150);
         empty.placeImageXY(IConstants.node, 425, 350);
 
+        empty.placeImageXY(this.displayInputWeights(), 166, 400);
+        empty.placeImageXY(this.displayHiddenWeights(), 333, 400);
+        empty.placeImageXY(this.displayLoss(), 150, 475);
+        empty.placeImageXY(this.displayAccuracy(), 350, 475);
         return empty;
+    }
+
+    public WorldImage displayInputWeights() {
+        WorldImage inputWeightRow0 = new TextImage(String.format("%.3g%n",
+                this.simpleNet.inputWeights[0][0]) + "   " + String.format("%.3g%n", this.simpleNet.inputWeights[0][1]), 20, Color.BLACK);
+        WorldImage inputWeightRow1 = new TextImage(String.format("%.3g%n",
+                this.simpleNet.inputWeights[1][0]) + "   " + String.format("%.3g%n", this.simpleNet.inputWeights[1][1]), 20, Color.BLACK);
+
+        WorldImage inputWeightResult = new AboveImage(inputWeightRow0, inputWeightRow1);
+
+        return inputWeightResult;
+    }
+
+    public WorldImage displayHiddenWeights() {
+        WorldImage hiddenWeightRow0 = new TextImage(String.format("%.3g%n",
+                this.simpleNet.hiddenWeights[0][0]) + "   " + String.format("%.3g%n", this.simpleNet.hiddenWeights[0][1]), 20, Color.BLACK);
+        WorldImage hiddenWeightRow1 = new TextImage(String.format("%.3g%n",
+                this.simpleNet.hiddenWeights[1][0]) + "   " + String.format("%.3g%n", this.simpleNet.hiddenWeights[1][1]), 20, Color.BLACK);
+
+        WorldImage hiddenWeightResult = new AboveImage(hiddenWeightRow0, hiddenWeightRow1);
+
+        return hiddenWeightResult;
+    }
+
+    public WorldImage displayLoss() {
+        WorldImage lossText = new TextImage("Loss: " + String.format("%.3g%n", this.loss), 25, Color.black);
+
+        return lossText;
+    }
+
+    public WorldImage displayAccuracy() {
+        WorldImage accuracyText = new TextImage("Accuracy: " + String.format("%.3g%n", this.simpleNet.computeAccuracy()), 25, Color.black);
+
+        return accuracyText;
     }
 
     @Override
     public void onTick() {
-        System.out.println("Loss: " + this.simpleNet.propAndUpdate());
+        this.loss =this.simpleNet.stochasticBackPropagation();
     }
 
     public Color scaleColor(double weight) {

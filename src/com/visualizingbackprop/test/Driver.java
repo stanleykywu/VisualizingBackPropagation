@@ -1,7 +1,5 @@
 package com.visualizingbackprop.test;
 
-import tester.Tester;
-
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -10,14 +8,10 @@ public class Driver {
         ArrayList<double[][]> inputs = generateRandomPoints(100);
         ArrayList<double[][]> expOut = generateCorrespondingOutput(inputs);
 
-        Net simple = new Net(inputs, expOut, true);
-
-//        for(int epoch = 0; epoch < 1000; epoch++) {
-//            System.out.println(simple.propAndUpdate());
-//        }
+        Net simple = new Net(inputs, expOut, false);
 
         WorldVisual simpleVisual = new WorldVisual(simple);
-        simpleVisual.bigBang(500, 500, 0.5);
+        simpleVisual.bigBang(500, 600, 0.2);
     }
 
     public static ArrayList<double[][]> generateRandomPoints(int numPoints) {
@@ -31,7 +25,6 @@ public class Driver {
             point[1][0] = (double) (new Random().nextInt(yRange) - 100) / 100;
 
             result.add(point);
-//            System.out.println(point[0][0] + " " + point[1][0]);
         }
         return result;
     }
