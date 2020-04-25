@@ -1,9 +1,12 @@
 package com.visualizingbackprop.test;
-import tester.Tester;
 
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.function.Function;
+
+interface INetConstants {
+    double learningRate = 0.5;
+}
 
 class Utility {
     double[][] multiplyMatrices(double[][] firstMatrix, double[][] secondMatrix) {
@@ -93,21 +96,40 @@ class Net {
         }
     }
 
-    public double propAndUpdate() {
-        double[][] lookAtInput = this.inputs.get(new Random().nextInt(this.inputs.size()));
-        double[][] lookAtOutput = this.expectedOut.get(new Random().nextInt(this.expectedOut.size()));
-
+    public double[][] onlyFrontProp(double[][] input) {
         if (this.activation) {
-            return this.propAndUpdateFunc(lookAtInput, lookAtOutput,
-                    (x -> this.sigmoid(x)), (x -> this.sigmoidDeriv(x)));
+            return this.onlyFrontPropFunc(input, (x -> this.sigmoid(x)));
         } else {
-            return this.propAndUpdateFunc(lookAtInput, lookAtOutput,
-                    (x -> this.rectLinear(x)), (x -> this.rectLinearDeriv(x)));
+            return this.onlyFrontPropFunc(input, (x -> this.rectLinear(x)));
         }
     }
 
-    public double propAndUpdateFunc(double[][] inputs, double[][] output, Function<Double, Double> activation,
-                                       Function<Double, Double> activationDer) {
+    public double[][] onlyFrontPropFunc(double[][] input, Function<Double, Double> activation) {
+        Utility utils = new Utility();
+
+        double[][] inA = utils.multiplyMatrices(this.inputWeights, input);
+        double[][] outA = utils.map(inA, activation);
+
+        double[][] inB = utils.multiplyMatrices(this.hiddenWeights, outA);
+        double[][] outB = utils.map(inB, activation);
+
+        return outB;
+    }
+
+    public double stochasticBackPropagation() {
+        int randIndex = new Random().nextInt(this.inputs.size());
+
+        if (this.activation) {
+            return this.stochasticBackPropFunc(inputs.get(randIndex), expectedOut.get(randIndex),
+                        (x -> this.sigmoid(x)), (x -> this.sigmoidDeriv(x)));
+        } else {
+            return this.stochasticBackPropFunc(inputs.get(randIndex), expectedOut.get(randIndex),
+                        (x -> this.rectLinear(x)), (x -> this.rectLinearDeriv(x)));
+        }
+    }
+
+    public double stochasticBackPropFunc(double[][] inputs, double[][] output, Function<Double, Double> activation,
+                                         Function<Double, Double> activationDer) {
         Utility utils = new Utility();
 
         double[][] inA = utils.multiplyMatrices(this.inputWeights, inputs);
@@ -129,17 +151,38 @@ class Net {
         double deltaIn10 = (deltaOut01 + deltaOut11) * activationDer.apply(inA[1][0]) * inputs[0][0];
         double deltaIn11 = (deltaOut01 + deltaOut11) * activationDer.apply(inA[1][0]) * inputs[1][0];
 
-        this.inputWeights[0][0] -= deltaIn00;
-        this.inputWeights[0][1] -= deltaIn01;
-        this.inputWeights[1][0] -= deltaIn10;
-        this.inputWeights[1][1] -= deltaIn11;
+        this.inputWeights[0][0] -= INetConstants.learningRate * deltaIn00;
+        this.inputWeights[0][1] -= INetConstants.learningRate * deltaIn01;
+        this.inputWeights[1][0] -= INetConstants.learningRate * deltaIn10;
+        this.inputWeights[1][1] -= INetConstants.learningRate * deltaIn11;
 
-        this.hiddenWeights[0][0] -= deltaOut00;
-        this.hiddenWeights[0][1] -= deltaOut01;
-        this.hiddenWeights[1][0] -= deltaOut10;
-        this.hiddenWeights[1][1] -= deltaOut11;
+        this.hiddenWeights[0][0] -= INetConstants.learningRate * deltaOut00;
+        this.hiddenWeights[0][1] -= INetConstants.learningRate * deltaOut01;
+        this.hiddenWeights[1][0] -= INetConstants.learningRate * deltaOut10;
+        this.hiddenWeights[1][1] -= INetConstants.learningRate * deltaOut11;
 
         return totalLossOne + totalLossTwo;
+    }
+
+    double computeAccuracy() {
+        double total = 0, counter = 0;
+
+        for (int i = 0; i < this.inputs.size(); i++) {
+            double[][] input = this.inputs.get(i);
+            double[][] expOut = this.expectedOut.get(i);
+            double[][] calcOut = this.onlyFrontProp(input);
+
+            System.out.println("Output: " + calcOut[0][0] + " " + calcOut[1][0]);
+            System.out.println("Expected: " + expOut[0][0] + " " + expOut[1][0]);
+            System.out.println();
+
+            if (Math.abs(calcOut[0][0] - expOut[0][0]) < 0.5 && Math.abs(calcOut[1][0] - expOut[1][0]) < 0.5) {
+                counter++;
+            }
+            total++;
+        }
+
+        return counter / total;
     }
 }
 
