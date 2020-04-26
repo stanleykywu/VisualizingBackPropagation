@@ -121,10 +121,10 @@ class Net {
 
         if (this.activation) {
             return this.stochasticBackPropFunc(inputs.get(randIndex), expectedOut.get(randIndex),
-                        (x -> this.sigmoid(x)), (x -> this.sigmoidDeriv(x)));
+                    (x -> this.sigmoid(x)), (x -> this.sigmoidDeriv(x)));
         } else {
             return this.stochasticBackPropFunc(inputs.get(randIndex), expectedOut.get(randIndex),
-                        (x -> this.rectLinear(x)), (x -> this.rectLinearDeriv(x)));
+                    (x -> this.rectLinear(x)), (x -> this.rectLinearDeriv(x)));
         }
     }
 
@@ -185,4 +185,3 @@ class Net {
         return counter / total;
     }
 }
-

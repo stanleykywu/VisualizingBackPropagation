@@ -5,13 +5,13 @@ import java.util.Random;
 
 public class Driver {
     public static void main(String ...args) {
-        ArrayList<double[][]> inputs = generateRandomPoints(100);
+        ArrayList<double[][]> inputs = generateRandomPoints(5);
         ArrayList<double[][]> expOut = generateCorrespondingOutput(inputs);
 
-        Net simple = new Net(inputs, expOut, false);
+        Net simple = new Net(inputs, expOut, true);
 
         WorldVisual simpleVisual = new WorldVisual(simple);
-        simpleVisual.bigBang(500, 600, 0.2);
+        simpleVisual.bigBang(500, 600, 0.5);
     }
 
     public static ArrayList<double[][]> generateRandomPoints(int numPoints) {

@@ -14,10 +14,12 @@ interface IConstants {
 public class WorldVisual extends World {
     Net simpleNet;
     double loss;
+    boolean forwardMove;
 
     WorldVisual(Net simpleNet) {
         this.simpleNet = simpleNet;
         this.loss = 0;
+        this.forwardMove = false;
     }
 
     @Override
@@ -54,6 +56,7 @@ public class WorldVisual extends World {
         empty.placeImageXY(this.displayHiddenWeights(), 333, 400);
         empty.placeImageXY(this.displayLoss(), 150, 475);
         empty.placeImageXY(this.displayAccuracy(), 350, 475);
+        empty.placeImageXY(this.displayMove(), 250, 100);
         return empty;
     }
 
@@ -91,14 +94,35 @@ public class WorldVisual extends World {
         return accuracyText;
     }
 
+    public WorldImage displayMove() {
+        String message;
+        if (this.forwardMove) {
+            message = "Currently Training";
+        } else {
+            message = "Training Stopped";
+        }
+        WorldImage onMove = new TextImage("Current State: " + message, 20, Color.black);
+
+        return onMove;
+    }
+
     @Override
     public void onTick() {
-        this.loss =this.simpleNet.stochasticBackPropagation();
+        if (this.forwardMove) {
+            this.loss = this.simpleNet.stochasticBackPropagation();
+        }
     }
 
     public Color scaleColor(double weight) {
         int whiteScale = 255 - Math.min(Math.max((int) (weight  * 255), 25), 255);
         return new Color(whiteScale, whiteScale, whiteScale);
+    }
+
+    @Override
+    public void onKeyReleased(String key) {
+        if (key.equals(" ")) {
+            this.forwardMove = !this.forwardMove;
+        }
     }
 
     @Override
