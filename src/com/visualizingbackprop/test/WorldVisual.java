@@ -31,26 +31,21 @@ public class WorldVisual extends World {
                 this.scaleColor(this.simpleNet.inputWeights[0][0])), 162, 150);
         empty.placeImageXY(new RectangleImage(175, 4, OutlineMode.SOLID,
                 this.scaleColor(this.simpleNet.inputWeights[1][1])), 162, 350);
-        empty.placeImageXY(new RectangleImage(175, 4, OutlineMode.SOLID,
-                this.scaleColor(this.simpleNet.hiddenWeights[0][0])), 337, 150);
-        empty.placeImageXY(new RectangleImage(175, 4, OutlineMode.SOLID,
-                this.scaleColor(this.simpleNet.hiddenWeights[1][1])), 337, 350);
 
         empty.placeImageXY(new RotateImage(new RectangleImage(265, 4, OutlineMode.SOLID,
                 this.scaleColor(this.simpleNet.inputWeights[1][0])), 48), 162, 250);
         empty.placeImageXY(new RotateImage(new RectangleImage(265, 4, OutlineMode.SOLID,
-                this.scaleColor(this.simpleNet.hiddenWeights[1][0])), 48), 337, 250);
-        empty.placeImageXY(new RotateImage(new RectangleImage(265, 4, OutlineMode.SOLID,
                 this.scaleColor(this.simpleNet.inputWeights[0][1])), 132), 162, 250);
-        empty.placeImageXY(new RotateImage(new RectangleImage(265, 4, OutlineMode.SOLID,
-                this.scaleColor(this.simpleNet.hiddenWeights[0][1])), 132), 337, 250);
+        empty.placeImageXY(new RotateImage(new RectangleImage(201, 4, OutlineMode.SOLID,
+                this.scaleColor(this.simpleNet.hiddenWeights[0][0])), 29), 337, 200);
+        empty.placeImageXY(new RotateImage(new RectangleImage(201, 4, OutlineMode.SOLID,
+                this.scaleColor(this.simpleNet.hiddenWeights[0][1])), 151), 337, 300);
 
         empty.placeImageXY(IConstants.node, 75, 150);
         empty.placeImageXY(IConstants.node, 75, 350);
         empty.placeImageXY(IConstants.node, 250, 150);
         empty.placeImageXY(IConstants.node, 250, 350);
-        empty.placeImageXY(IConstants.node, 425, 150);
-        empty.placeImageXY(IConstants.node, 425, 350);
+        empty.placeImageXY(IConstants.node, 425, 250);
 
         empty.placeImageXY(this.displayInputWeights(), 166, 400);
         empty.placeImageXY(this.displayHiddenWeights(), 333, 400);
@@ -74,12 +69,8 @@ public class WorldVisual extends World {
     public WorldImage displayHiddenWeights() {
         WorldImage hiddenWeightRow0 = new TextImage(String.format("%.3g%n",
                 this.simpleNet.hiddenWeights[0][0]) + "   " + String.format("%.3g%n", this.simpleNet.hiddenWeights[0][1]), 20, Color.BLACK);
-        WorldImage hiddenWeightRow1 = new TextImage(String.format("%.3g%n",
-                this.simpleNet.hiddenWeights[1][0]) + "   " + String.format("%.3g%n", this.simpleNet.hiddenWeights[1][1]), 20, Color.BLACK);
 
-        WorldImage hiddenWeightResult = new AboveImage(hiddenWeightRow0, hiddenWeightRow1);
-
-        return hiddenWeightResult;
+        return hiddenWeightRow0;
     }
 
     public WorldImage displayLoss() {
@@ -110,6 +101,9 @@ public class WorldVisual extends World {
     public void onTick() {
         if (this.forwardMove) {
             this.loss = this.simpleNet.stochasticBackPropagation();
+        }
+        if (this.simpleNet.computeAccuracy() >= 0.90) {
+            this.forwardMove = false;
         }
     }
 
