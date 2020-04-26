@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.function.Function;
 
 interface INetConstants {
-    double learningRate = 1;
+    double learningRate = 0.1;
 }
 
 class Utility {
@@ -47,6 +47,8 @@ class Utility {
 class Net {
     double[][] inputWeights;
     double[][] hiddenWeights;
+    double[][] inputBias;
+    double hiddenBias;
     ArrayList<double[][]> inputs;
     ArrayList<double[][]> expectedOut;
     boolean activation;
@@ -56,8 +58,18 @@ class Net {
         this.expectedOut = expectedOut;
         this.activation = activ;
 
+        this.hiddenBias = new Random().nextFloat();
+
+        this.inputBias = new double[2][1];
+
+        for (int i = 0; i < inputBias.length; i++) {
+            for (int j = 0; j < inputBias[0].length; j++) {
+                this.inputBias[i][j] = new Random().nextFloat();
+            }
+        }
+
         this.inputWeights = new double[2][2];
-        this.hiddenWeights = new double[2][2];
+        this.hiddenWeights = new double[1][2];
 
         for (int i = 0; i < inputWeights.length; i++) {
             for(int j = 0; j < inputWeights[0].length; j++) {
@@ -108,9 +120,12 @@ class Net {
         Utility utils = new Utility();
 
         double[][] inA = utils.multiplyMatrices(this.inputWeights, input);
+        inA[0][0] += this.inputBias[0][0];
+        inA[1][0] += this.inputBias[1][0];
         double[][] outA = utils.map(inA, activation);
 
         double[][] inB = utils.multiplyMatrices(this.hiddenWeights, outA);
+        inB[0][0] += this.hiddenBias;
         double[][] outB = utils.map(inB, activation);
 
         return outB;
@@ -133,35 +148,54 @@ class Net {
         Utility utils = new Utility();
 
         double[][] inA = utils.multiplyMatrices(this.inputWeights, inputs);
+        inA[0][0] += this.inputBias[0][0];
+        inA[1][0] += this.inputBias[1][0];
         double[][] outA = utils.map(inA, activation);
 
         double[][] inB = utils.multiplyMatrices(this.hiddenWeights, outA);
+        inB[0][0] += this.hiddenBias;
         double[][] outB = utils.map(inB, activation);
 
-        double totalLossOne = utils.loss(outB[0][0], output[0][0]);
-        double totalLossTwo = utils.loss(outB[1][0], output[1][0]);
+        if (!this.correctClassification(outB, output)) {
 
-        double deltaOut00 = 2 * (outB[0][0] - output[0][0]) * activationDer.apply(inB[0][0]) * outA[0][0];
-        double deltaOut01 = 2 * (outB[0][0] - output[0][0]) * activationDer.apply(inB[1][0]) * outA[0][0];
-        double deltaOut10 = 2 * (outB[1][0] - output[1][0]) * activationDer.apply(inB[0][0]) * outA[1][0];
-        double deltaOut11 = 2 * (outB[1][0] - output[1][0]) * activationDer.apply(inB[1][0]) * outA[1][0];
+            double totalLossOne = utils.loss(outB[0][0], output[0][0]);
 
-        double deltaIn00 = (deltaOut00 + deltaOut10) * activationDer.apply(inA[0][0]) * inputs[0][0];
-        double deltaIn01 = (deltaOut00 + deltaOut10) * activationDer.apply(inA[0][0]) * inputs[1][0];
-        double deltaIn10 = (deltaOut01 + deltaOut11) * activationDer.apply(inA[1][0]) * inputs[0][0];
-        double deltaIn11 = (deltaOut01 + deltaOut11) * activationDer.apply(inA[1][0]) * inputs[1][0];
+            double deltaOut00 = 2 * (outB[0][0] - output[0][0]) * activationDer.apply(inB[0][0]) * outA[0][0];
+            double deltaOut01 = 2 * (outB[0][0] - output[0][0]) * activationDer.apply(inB[0][0]) * outA[1][0];
 
-        this.inputWeights[0][0] -= INetConstants.learningRate * deltaIn00;
-        this.inputWeights[0][1] -= INetConstants.learningRate * deltaIn01;
-        this.inputWeights[1][0] -= INetConstants.learningRate * deltaIn10;
-        this.inputWeights[1][1] -= INetConstants.learningRate * deltaIn11;
+            double deltaHiddenBias = 2 * (outB[0][0] - output[0][0]) * activationDer.apply(inB[0][0]);
 
-        this.hiddenWeights[0][0] -= INetConstants.learningRate * deltaOut00;
-        this.hiddenWeights[0][1] -= INetConstants.learningRate * deltaOut01;
-        this.hiddenWeights[1][0] -= INetConstants.learningRate * deltaOut10;
-        this.hiddenWeights[1][1] -= INetConstants.learningRate * deltaOut11;
+            double deltaIn00 = (deltaOut00) * activationDer.apply(inA[0][0]) * inputs[0][0];
+            double deltaIn01 = (deltaOut00) * activationDer.apply(inA[0][0]) * inputs[1][0];
+            double deltaIn10 = (deltaOut01) * activationDer.apply(inA[1][0]) * inputs[0][0];
+            double deltaIn11 = (deltaOut01) * activationDer.apply(inA[1][0]) * inputs[1][0];
 
-        return totalLossOne + totalLossTwo;
+            double deltaInputBias0 = (deltaOut00) * activationDer.apply(inA[0][0]);
+            double deltaInputBias1 = (deltaOut01) * activationDer.apply(inA[1][0]);
+
+            this.inputWeights[0][0] -= INetConstants.learningRate * deltaIn00;
+            this.inputWeights[0][1] -= INetConstants.learningRate * deltaIn01;
+            this.inputWeights[1][0] -= INetConstants.learningRate * deltaIn10;
+            this.inputWeights[1][1] -= INetConstants.learningRate * deltaIn11;
+            this.inputBias[0][0] -= deltaInputBias0;
+            this.inputBias[1][0] -= deltaInputBias1;
+
+            this.hiddenWeights[0][0] -= INetConstants.learningRate * deltaOut00;
+            this.hiddenWeights[0][1] -= INetConstants.learningRate * deltaOut01;
+            this.hiddenBias -= deltaHiddenBias;
+
+            return totalLossOne;
+        } else {
+            return 0;
+        }
+    }
+
+    boolean correctClassification(double[][] calcOut, double[][] expOut) {
+        if ((calcOut[0][0] >= 0.5 && expOut[0][0] == 1) ||
+                (calcOut[0][0] < 0.5 && expOut[0][0] == 0.5)) {
+            return true;
+        }
+        else return false;
     }
 
     double computeAccuracy() {
@@ -172,17 +206,17 @@ class Net {
             double[][] expOut = this.expectedOut.get(i);
             double[][] calcOut = this.onlyFrontProp(input);
 
-            System.out.println("Output: " + calcOut[0][0] + " " + calcOut[1][0]);
-            System.out.println("Expected: " + expOut[0][0] + " " + expOut[1][0]);
+//            System.out.println("Output: " + calcOut[0][0]);
+//            System.out.println("Expected: " + expOut[0][0]);
 
-            if ((calcOut[0][0] > calcOut[1][0] && expOut[0][0] > expOut[1][0]) ||
-                    (calcOut[0][0] <= calcOut[1][0] && expOut[0][0] <= expOut[1][0])) {
+            if ((calcOut[0][0] >= 0.5 && expOut[0][0] == 1) ||
+                    (calcOut[0][0] < 0.5 && expOut[0][0] == 0.5)) {
                 counter++;
-                System.out.println("Classification Correct");
+//                System.out.println("Classification Correct");
             }
             total++;
 
-            System.out.println();
+//            System.out.println();
         }
 
         return counter / total;
