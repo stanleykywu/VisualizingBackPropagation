@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.function.Function;
 
 interface INetConstants {
-    double learningRate = 0.5;
+    double learningRate = 1;
 }
 
 class Utility {
@@ -174,12 +174,15 @@ class Net {
 
             System.out.println("Output: " + calcOut[0][0] + " " + calcOut[1][0]);
             System.out.println("Expected: " + expOut[0][0] + " " + expOut[1][0]);
-            System.out.println();
 
-            if (Math.abs(calcOut[0][0] - expOut[0][0]) < 0.5 && Math.abs(calcOut[1][0] - expOut[1][0]) < 0.5) {
+            if ((calcOut[0][0] > calcOut[1][0] && expOut[0][0] > expOut[1][0]) ||
+                    (calcOut[0][0] <= calcOut[1][0] && expOut[0][0] <= expOut[1][0])) {
                 counter++;
+                System.out.println("Classification Correct");
             }
             total++;
+
+            System.out.println();
         }
 
         return counter / total;

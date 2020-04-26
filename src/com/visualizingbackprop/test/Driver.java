@@ -5,13 +5,13 @@ import java.util.Random;
 
 public class Driver {
     public static void main(String ...args) {
-        ArrayList<double[][]> inputs = generateRandomPoints(5);
+        ArrayList<double[][]> inputs = generateRandomPoints(50);
         ArrayList<double[][]> expOut = generateCorrespondingOutput(inputs);
 
         Net simple = new Net(inputs, expOut, true);
 
         WorldVisual simpleVisual = new WorldVisual(simple);
-        simpleVisual.bigBang(500, 600, 0.5);
+        simpleVisual.bigBang(500, 600, 2);
     }
 
     public static ArrayList<double[][]> generateRandomPoints(int numPoints) {
@@ -36,7 +36,7 @@ public class Driver {
             double[][] resultPoint = new double[2][1];
             double x = point[0][0] * 100;
             double y = point[1][0] * 100;
-            if (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) <= 50) {
+            if (y > 0.1 * Math.pow(x, 2)) {
                 resultPoint[0][0] = 1;
                 resultPoint[1][0] = 0;
             } else {
